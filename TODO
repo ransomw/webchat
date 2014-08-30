@@ -1,2 +1,2 @@
-* move "server-side" (python script) into seperate directory tree
+* edit button "start chat" to "take photo" and enable photo taking capabilities
 * add ruby equivalent of python server
