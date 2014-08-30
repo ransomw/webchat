@@ -1,2 +1,3 @@
 * edit button "start chat" to "take photo" and enable photo taking capabilities
 * add ruby equivalent of python server
+* edit python server side to use tornado rather than SimpleHttpServer
