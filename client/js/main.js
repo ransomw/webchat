@@ -28,14 +28,17 @@ require([
 ], function (_, when) {
     "use strict";
 
-    debugger;
-
     /* #begin copy 'n paste code from mozdemo */
     var streaming = false,
         video        = document.querySelector('#video'),
         canvas       = document.querySelector('#canvas'),
-        photo        = document.querySelector('#photo'),
+
+        // photo        = document.querySelector('#photo'),
+
         startbutton  = document.querySelector('#startbutton'),
+
+        $_server_content = document.querySelector('#server-content'),
+
         width = 320,
         height = 0;
 
@@ -74,15 +77,28 @@ require([
         }
     }, false);
 
+    var _SERVER_URL = 'http://localhost:3000/';
+
+    var _set_photo = function () {
+        var src_url = _SERVER_URL + 'assets/img/linkedin_profile.jpg';
+        $_server_content.innerHTML = [
+            '<img src="',
+            src_url,
+            '">'].join('');
+    };
+
     function takepicture() {
         canvas.width = width;
         canvas.height = height;
         canvas.getContext('2d').drawImage(video, 0, 0, width, height);
         var data = canvas.toDataURL('image/png');
-        photo.setAttribute('src', data);
+
+        // photo.setAttribute('src', data);
+        alert("setting new photo source is unimplemented");
     }
 
     startbutton.addEventListener('click', function(ev){
+        _set_photo();
         takepicture();
         ev.preventDefault();
     }, false);
