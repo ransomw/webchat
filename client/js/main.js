@@ -1,5 +1,5 @@
 require.config({
-    baseUrl: '../client',
+    baseUrl: '',
     paths: {
         'lodash': 'bower_components/lodash/dist/lodash.min',
         'when': 'bower_components/when',
