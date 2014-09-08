@@ -3,8 +3,9 @@ require.config({
     paths: {
         'lodash': 'bower_components/lodash/dist/lodash.min',
         'when': 'bower_components/when',
-        'domReady': 'bower_components/requirejs-domready/domReady'
+        'domReady': 'bower_components/requirejs-domready/domReady',
 
+        'config': 'js/config'
     },
     packages: [
         {name: 'when', path: 'bower_components/when', main: 'when'}
@@ -23,10 +24,22 @@ require.config({
 });
 
 require([
-    'lodash', 'when',
+    'lodash',
+    'when',
+    'config/server',
+    'js/constants',
     'domReady!'
-], function (_, when) {
+], function (_, when, serv_config, constants) {
     "use strict";
+
+    console.log("init with lodash");
+    console.log(_);
+    console.log("init with when");
+    console.log(when);
+    console.log("init with config module");
+    console.log(serv_config);
+    console.log("init with constants module");
+    console.log(constants);
 
     /* #begin copy 'n paste code from mozdemo */
     var streaming = false,
@@ -40,7 +53,20 @@ require([
         $_server_content = document.querySelector('#server-content'),
 
         width = 320,
-        height = 0;
+        height = 0,
+
+        _SERVER_URL = 'http://' +
+            ['localhost',
+             '3000'].join(':');
+
+
+        // _SERVER_URL = 'http://' +
+        //     [serv_config.server_domain,
+        //      serv_config.server_port.toString()].join(':');
+
+    console.log("init with server url");
+    console.log(_SERVER_URL);
+
 
     navigator.getMedia = ( navigator.getUserMedia ||
                            navigator.webkitGetUserMedia ||
@@ -77,10 +103,9 @@ require([
         }
     }, false);
 
-    var _SERVER_URL = 'http://localhost:3000/';
-
     var _set_photo = function () {
-        var src_url = _SERVER_URL + 'assets/img/linkedin_profile.jpg';
+        var src_url = [_SERVER_URL,
+                       'assets/img/linkedin_profile.jpg'].join('/');
         $_server_content.innerHTML = [
             '<img src="',
             src_url,
