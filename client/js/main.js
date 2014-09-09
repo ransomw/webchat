@@ -1,3 +1,7 @@
+
+/*jslint nomen: true */
+
+
 require.config({
     baseUrl: '',
     paths: {
@@ -22,6 +26,11 @@ require.config({
     //     }
     // }
 });
+
+/*global document: true */
+/*global alert: true */
+/*global navigator: true */
+/*global window: true */
 
 require([
     'lodash',
@@ -56,29 +65,47 @@ require([
         height = 0,
 
         _SERVER_URL = 'http://' +
-            ['localhost',
-             '3000'].join(':');
+            ['localhost', '3000'].join(':'),
 
 
         // _SERVER_URL = 'http://' +
         //     [serv_config.server_domain,
         //      serv_config.server_port.toString()].join(':');
 
+
+        _set_photo = function () {
+            var src_url = [_SERVER_URL,
+                           'assets/img/linkedin_profile.jpg'].join('/');
+            $_server_content.innerHTML = [
+                '<img src="',
+                src_url,
+                '">'].join('');
+        },
+
+        takepicture = function () {
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext('2d').drawImage(video, 0, 0, width, height);
+            // var data = canvas.toDataURL('image/png');
+            // photo.setAttribute('src', data);
+            alert("setting new photo source is unimplemented");
+        };
+
     console.log("init with server url");
     console.log(_SERVER_URL);
 
 
-    navigator.getMedia = ( navigator.getUserMedia ||
-                           navigator.webkitGetUserMedia ||
-                           navigator.mozGetUserMedia ||
-                           navigator.msGetUserMedia);
+    navigator.getMedia = (navigator.getUserMedia ||
+                          navigator.webkitGetUserMedia ||
+                          navigator.mozGetUserMedia ||
+                          navigator.msGetUserMedia);
 
     navigator.getMedia(
         {
             video: true,
             audio: false
         },
-        function(stream) {
+        function (stream) {
             if (navigator.mozGetUserMedia) {
                 video.mozSrcObject = stream;
             } else {
@@ -87,14 +114,15 @@ require([
             }
             video.play();
         },
-        function(err) {
+        function (err) {
             console.log("An error occured! " + err);
         }
     );
 
-    video.addEventListener('canplay', function(ev){
+    // video.addEventListener('canplay', function (ev) {
+    video.addEventListener('canplay', function () {
         if (!streaming) {
-            height = video.videoHeight / (video.videoWidth/width);
+            height = video.videoHeight / (video.videoWidth / width);
             video.setAttribute('width', width);
             video.setAttribute('height', height);
             canvas.setAttribute('width', width);
@@ -103,26 +131,7 @@ require([
         }
     }, false);
 
-    var _set_photo = function () {
-        var src_url = [_SERVER_URL,
-                       'assets/img/linkedin_profile.jpg'].join('/');
-        $_server_content.innerHTML = [
-            '<img src="',
-            src_url,
-            '">'].join('');
-    };
-
-    function takepicture() {
-        canvas.width = width;
-        canvas.height = height;
-        canvas.getContext('2d').drawImage(video, 0, 0, width, height);
-        var data = canvas.toDataURL('image/png');
-
-        // photo.setAttribute('src', data);
-        alert("setting new photo source is unimplemented");
-    }
-
-    startbutton.addEventListener('click', function(ev){
+    startbutton.addEventListener('click', function (ev) {
         _set_photo();
         takepicture();
         ev.preventDefault();
