@@ -43,7 +43,7 @@ require([
         height = 0,
 
         _SERVER_URL = 'http://' +
-            ['localhost', '3000'].join(':'),
+            [serv_config.server_domain, serv_config.server_port].join(':'),
 
 
         // _SERVER_URL = 'http://' +
