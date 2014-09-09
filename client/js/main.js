@@ -5,26 +5,10 @@
 require.config({
     baseUrl: '',
     paths: {
-        'lodash': 'bower_components/lodash/dist/lodash.min',
-        'when': 'bower_components/when',
         'domReady': 'bower_components/requirejs-domready/domReady',
 
         'config': 'js/config'
-    },
-    packages: [
-        {name: 'when', path: 'bower_components/when', main: 'when'}
-    ]
-
-    // ,
-    // shim: {
-    //     'backbone': {
-    //         deps: ['underscore'],
-    //         exports: 'Backbone'
-    //     },
-    //     'handlebars': {
-    //         exports: 'Handlebars'
-    //     }
-    // }
+    }
 });
 
 /*global document: true */
@@ -33,18 +17,12 @@ require.config({
 /*global window: true */
 
 require([
-    'lodash',
-    'when',
     'config/server',
     'js/constants',
     'domReady!'
-], function (_, when, serv_config, constants) {
+], function (serv_config, constants) {
     "use strict";
 
-    console.log("init with lodash");
-    console.log(_);
-    console.log("init with when");
-    console.log(when);
     console.log("init with config module");
     console.log(serv_config);
     console.log("init with constants module");
