@@ -17,22 +17,29 @@ fi
 
 DEPLOY_DEST=$2
 
+cp -r bower_components \
+    style \
+    js \
+    index.html \
+    $DEST_DIR
+
+if [ -f $DEST_DIR/js/config/server.js ]
+then
+		rm $DEST_DIR/js/config/server.js
+fi
+
 case $DEPLOY_DEST in
     "local")
-        echo "local deploy"
+				cp js/config/server_local.js \
+						$DEST_DIR/js/config/server.js
         ;;
     "remote")
-        echo "remote deploy"
+				cp js/config/server_remote.js \
+						$DEST_DIR/js/config/server.js
         ;;
     *)
         echo "unknown deploy destination" 1>&2
         exit 1
         ;;
 esac
-
-cp -r bower_components \
-    style \
-    js \
-    index.html \
-    $DEST_DIR
 
