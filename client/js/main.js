@@ -17,16 +17,10 @@ require.config({
 /*global window: true */
 
 require([
-    'config/server',
     'js/constants',
     'domReady!'
-], function (serv_config, constants) {
+], function (CONST) {
     "use strict";
-
-    console.log("init with config module");
-    console.log(serv_config);
-    console.log("init with constants module");
-    console.log(constants);
 
     /* #begin copy 'n paste code from mozdemo */
     var streaming = false,
@@ -42,21 +36,10 @@ require([
         width = 320,
         height = 0,
 
-        _SERVER_URL = 'http://' +
-            [serv_config.server_domain, serv_config.server_port].join(':'),
-
-
-        // _SERVER_URL = 'http://' +
-        //     [serv_config.server_domain,
-        //      serv_config.server_port.toString()].join(':');
-
-
         _set_photo = function () {
-            var src_url = [_SERVER_URL,
-                           'assets/img/linkedin_profile.jpg'].join('/');
             $_server_content.innerHTML = [
                 '<img src="',
-                src_url,
+                CONST.photo_url,
                 '">'].join('');
         },
 
@@ -68,9 +51,6 @@ require([
             // photo.setAttribute('src', data);
             alert("setting new photo source is unimplemented");
         };
-
-    console.log("init with server url");
-    console.log(_SERVER_URL);
 
 
     navigator.getMedia = (navigator.getUserMedia ||
