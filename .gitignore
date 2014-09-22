@@ -1,3 +1,5 @@
 *~
+*.pyc
+
 client/bower_components/
 client/js/config/server.js
