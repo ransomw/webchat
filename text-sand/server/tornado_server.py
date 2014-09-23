@@ -31,7 +31,22 @@ class KnockerHandler(tornado.web.RequestHandler):
 
 class PeepholeHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write("peephole unimplemented")
+        if not self.get_cookie('owner'):
+            self.redirect('/keyhole')
+        else:
+            self.render('peephole.html')
+
+    def post(self):
+        action_type = self.get_body_argument('action_type')
+        if action_type == 'exit':
+            self.set_cookie('owner', '')
+            self.redirect('/keyhole')
+        elif action_type == 'open':
+            self.write("open door to guest unimplemented")
+        else:
+            raise Exception(("with owner at peephole, "
+                             "unknown action type: ") + action_type)
+
 
 class RoomHandler(tornado.web.RequestHandler):
     def get(self):
