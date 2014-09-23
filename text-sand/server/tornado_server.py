@@ -9,7 +9,7 @@ ASSETS_DIR = path.join(path.split(SCRIPT_DIR)[0], 'assets')
 
 SECRET_KEY = 'mmmsecret'
 
-GUEST_NAME = None
+APP_STATE = dict(guest_name=None)
 
 class KeyholeHandler(tornado.web.RequestHandler):
     def get(self):
@@ -29,8 +29,8 @@ class KeyholeHandler(tornado.web.RequestHandler):
 
 class KnockerHandler(tornado.web.RequestHandler):
     def get(self):
-        print "guest name in get", GUEST_NAME
-        if (GUEST_NAME is None
+        print "guest name in get", APP_STATE['guest_name']
+        if (APP_STATE['guest_name'] is None
             and not self.get_cookie('guest')):
             self.render('knocker.html')
         elif self.get_cookie('guest'):
@@ -39,24 +39,24 @@ class KnockerHandler(tornado.web.RequestHandler):
             self.write("another guest is ahead of you")
 
     def post(self):
-        print "guest name in post", GUEST_NAME
-        if globals()['GUEST_NAME'] is not None:
+        print "guest name in post", APP_STATE['guest_name']
+        if APP_STATE['guest_name'] is not None:
             # security (call the cops)
             self.write(("you may not knock "
                         "if another guest is ahead of you"))
         else:
-            GUEST_NAME = self.get_body_argument('guest_name')
+            APP_STATE['guest_name'] = self.get_body_argument('guest_name')
             self.set_cookie('guest', 'is_guest')
             self.redirect('/knocker')
 
     def put(self):
-        print "guest name in put", GUEST_NAME
+        print "guest name in put", APP_STATE['guest_name']
         if not self.get_cookie('guest'):
             # security
             self.write("you are not the next guest")
         elif self.get_body_argument('action_type') == 'leave':
             st()
-            GUEST_NAME = None
+            APP_STATE['guest_name'] = None
             self.set_cookie('guest', '')
             self.redirect('/knocker')
 
@@ -64,8 +64,8 @@ class PeepholeHandler(tornado.web.RequestHandler):
     def get(self):
         if not self.get_cookie('owner'):
             self.redirect('/keyhole')
-        elif GUEST_NAME is not None:
-            self.render('peephole_guest.html', guest_name=GUEST_NAME)
+        elif APP_STATE['guest_name'] is not None:
+            self.render('peephole_guest.html', guest_name=APP_STATE['guest_name'])
         else:
             self.render('peephole.html')
 
