@@ -29,7 +29,6 @@ class KeyholeHandler(tornado.web.RequestHandler):
 
 class KnockerHandler(tornado.web.RequestHandler):
     def get(self):
-        print "guest name in get", APP_STATE['guest_name']
         if (APP_STATE['guest_name'] is None
             and not self.get_cookie('guest')):
             self.render('knocker.html')
@@ -39,26 +38,27 @@ class KnockerHandler(tornado.web.RequestHandler):
             self.write("another guest is ahead of you")
 
     def post(self):
-        print "guest name in post", APP_STATE['guest_name']
-        if APP_STATE['guest_name'] is not None:
+        try:
+            action_type = self.get_body_argument('action_type')
+        except tornado.web.MissingArgumentError:
+            action_type = None
+        if (APP_STATE['guest_name'] is not None
+            and action_type is None):
             # security (call the cops)
             self.write(("you may not knock "
                         "if another guest is ahead of you"))
+        elif action_type is not None:
+            if action_type == 'leave':
+                APP_STATE['guest_name'] = None
+                self.set_cookie('guest', '')
+                self.redirect('/knocker')
+            else:
+                self.write("unknown action type: " + action_type)
         else:
             APP_STATE['guest_name'] = self.get_body_argument('guest_name')
             self.set_cookie('guest', 'is_guest')
             self.redirect('/knocker')
 
-    def put(self):
-        print "guest name in put", APP_STATE['guest_name']
-        if not self.get_cookie('guest'):
-            # security
-            self.write("you are not the next guest")
-        elif self.get_body_argument('action_type') == 'leave':
-            st()
-            APP_STATE['guest_name'] = None
-            self.set_cookie('guest', '')
-            self.redirect('/knocker')
 
 class PeepholeHandler(tornado.web.RequestHandler):
     def get(self):
