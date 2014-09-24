@@ -44,10 +44,8 @@ class KnockerHandler(tornado.web.RequestHandler):
             self.write("another guest is ahead of you")
 
     def post(self):
-        try:
-            action_type = self.get_body_argument('action_type')
-        except tornado.web.MissingArgumentError:
-            action_type = None
+        action_type = self.get_body_argument(
+            'action_type', default=None)
         if (APP_STATE['guest_name'] is not None
             and action_type is None):
             # security (call the cops)
@@ -104,11 +102,27 @@ class RoomHandler(tornado.web.RequestHandler):
             APP_STATE['chatting'] = False
         self.redirect('/room') # rely on redirect in get
 
+class RoomApiHandler(tornado.web.RequestHandler):
+    def get(self):
+        print "room api get request"
+        print "guest cookie: ", self.get_cookie('guest')
+        print "owner cookie: ", self.get_cookie('owner')
+
+        return self.write("get messages unimplemented")
+
+    def post(self):
+        print "room api post request"
+        print "message: ", self.get_arguments('message')
+        print "guest cookie: ", self.get_cookie('guest')
+        print "owner cookie: ", self.get_cookie('owner')
+
+
 application = tornado.web.Application([
     (r"/keyhole", KeyholeHandler),
     (r"/", KnockerHandler),
     (r"/knocker", KnockerHandler),
     (r"/peephole", PeepholeHandler),
     (r"/room", RoomHandler),
+    (r"/room/api", RoomApiHandler),
     (r'/assets/(.*)', tornado.web.StaticFileHandler, {'path': ASSETS_DIR}),
 ])

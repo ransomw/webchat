@@ -14,4 +14,9 @@ require([
     "use strict";
 
     console.log("top of main");
+
+    $.get('room/api').then(function (res) { console.log(res); });
+
+    $.post('room/api', {'message': "hey there"});
+
 });
