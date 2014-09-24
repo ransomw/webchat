@@ -9,7 +9,10 @@ ASSETS_DIR = path.join(path.split(SCRIPT_DIR)[0], 'assets')
 
 SECRET_KEY = 'mmmsecret'
 
-APP_STATE = dict(guest_name=None)
+APP_STATE = dict(
+    guest_name=None,
+    chatting=False
+)
 
 class KeyholeHandler(tornado.web.RequestHandler):
     def get(self):
@@ -33,7 +36,10 @@ class KnockerHandler(tornado.web.RequestHandler):
             and not self.get_cookie('guest')):
             self.render('knocker.html')
         elif self.get_cookie('guest'):
-            self.render('knocker_wait.html')
+            if APP_STATE['chatting']:
+                self.redirect('/room')
+            else:
+                self.render('knocker_wait.html')
         else:
             self.write("another guest is ahead of you")
 
@@ -75,7 +81,8 @@ class PeepholeHandler(tornado.web.RequestHandler):
             self.set_cookie('owner', '')
             self.redirect('/keyhole')
         elif action_type == 'open':
-            self.write("open door to guest unimplemented")
+            APP_STATE['chatting'] = True
+            self.redirect('/room')
         else:
             raise Exception(("with owner at peephole, "
                              "unknown action type: ") + action_type)
@@ -83,13 +90,25 @@ class PeepholeHandler(tornado.web.RequestHandler):
 
 class RoomHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write("room unimplemented")
+        if not APP_STATE['chatting']:
+            if self.get_cookie('owner'):
+                self.redirect('/peephole')
+            else:
+                self.redirect('/knocker')
+        else:
+            self.render('room.html')
+
+    def post(self):
+        action_type = self.get_body_argument('action_type')
+        if action_type == 'stop':
+            APP_STATE['chatting'] = False
+        self.redirect('/room') # rely on redirect in get
 
 application = tornado.web.Application([
     (r"/keyhole", KeyholeHandler),
     (r"/", KnockerHandler),
     (r"/knocker", KnockerHandler),
     (r"/peephole", PeepholeHandler),
-    (r"/roomhole", RoomHandler),
+    (r"/room", RoomHandler),
     (r'/assets/(.*)', tornado.web.StaticFileHandler, {'path': ASSETS_DIR}),
 ])
