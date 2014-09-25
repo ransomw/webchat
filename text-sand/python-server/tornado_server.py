@@ -6,6 +6,7 @@ import tornado.web
 
 SCRIPT_DIR = path.dirname(path.realpath(__file__))
 ASSETS_DIR = path.join(path.split(SCRIPT_DIR)[0], 'assets')
+TEMPLATE_DIR = path.join(path.split(SCRIPT_DIR)[0], 'views', 'server')
 
 SECRET_KEY = 'mmmsecret'
 
@@ -127,4 +128,4 @@ application = tornado.web.Application([
     (r"/room", RoomHandler),
     (r"/room/api", RoomApiHandler),
     (r'/assets/(.*)', tornado.web.StaticFileHandler, {'path': ASSETS_DIR}),
-])
+], template_path=TEMPLATE_DIR)
