@@ -15,8 +15,25 @@ require([
 
     console.log("top of main");
 
-    $.get('room/api').then(function (res) { console.log(res); });
+    var $messages = $('#messages');
 
-    $.post('room/api', {'message': "hey there"});
+    var update_msgs = function () {
+        $.get('room/api').then(function (messages) {
+            $messages.html(messages.replace(/\n/g, '<br/>'));
+        });
+    };
+
+    window.setInterval(function () {
+        update_msgs();
+    }, 1000); // ms
+
+
+    $('#new-message').on('keypress', function(event) {
+        // ENTER & non-empty.
+        if (event.keyCode === 13 && event.target.value.length) {
+            $.post('room/api', {'message': event.target.value});
+            event.target.value = '';
+        }
+    });
 
 });

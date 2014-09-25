@@ -11,7 +11,8 @@ SECRET_KEY = 'mmmsecret'
 
 APP_STATE = dict(
     guest_name=None,
-    chatting=False
+    chatting=False,
+    messages = []
 )
 
 class KeyholeHandler(tornado.web.RequestHandler):
@@ -100,21 +101,22 @@ class RoomHandler(tornado.web.RequestHandler):
         action_type = self.get_body_argument('action_type')
         if action_type == 'stop':
             APP_STATE['chatting'] = False
+            APP_STATE['messages'] = []
         self.redirect('/room') # rely on redirect in get
 
 class RoomApiHandler(tornado.web.RequestHandler):
     def get(self):
-        print "room api get request"
-        print "guest cookie: ", self.get_cookie('guest')
-        print "owner cookie: ", self.get_cookie('owner')
-
-        return self.write("get messages unimplemented")
+        self.write('\n'.join(map(lambda msg: msg[0] + ': ' + msg[1],
+                                 APP_STATE['messages'])))
 
     def post(self):
-        print "room api post request"
-        print "message: ", self.get_arguments('message')
-        print "guest cookie: ", self.get_cookie('guest')
-        print "owner cookie: ", self.get_cookie('owner')
+        message = self.get_argument('message')
+        if self.get_cookie('guest'):
+            APP_STATE['messages'].append([APP_STATE['guest_name'], message])
+        elif self.get_cookie('owner'):
+            APP_STATE['messages'].append(['X', message])
+
+
 
 
 application = tornado.web.Application([
