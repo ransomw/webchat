@@ -13,7 +13,7 @@ app.use(session({
 
 app.use(function(req, res, next) {
   if (!req.session || !req.session.isOwner) {
-      req.session.isGuest = true;
+      req.session.isGuest = false;
       req.session.isOwner = false;
   }
   next();
@@ -51,7 +51,6 @@ app.post('/keyhole', function(req, res, next){
     var attemptedKey = req.body.secret_key;
     if (attemptedKey === secretKey) {
         req.session.isOwner = true;
-        req.session.isGuest = false;
         res.redirect('/peephole');
     } else {
         res.send("got incorrect key '" + attemptedKey + "'");
@@ -62,21 +61,37 @@ app.get('/peephole', function(req, res, next){
   if (!req.session.isOwner) {
       res.redirect('/keyhole');
   } else if (appState.guestName !== null) {
-      res.send("guest at peephole, but template unimplemented");
+      res.render('peephole_wait', { guest_name: appState.guestName });
   } else {
-      res.send("peephole template unimplemented");
+      res.render('peephole', {});
   }
 });
 
+app.post('/peephole', function(req, res, next){
+    var actionType = req.body.action_type;
+    if (actionType === 'exit') {
+        req.session.isOwner = false;
+        res.redirect('/keyhole');
+    } else if (actionType == 'open') {
+        appState.chatting = true;
+        res.redirect('/room');
+    } else {
+        throw new Error(["with owner at peephole, ",
+                         "unknown action type: ",
+                         actionType].join(''));
+    }
+});
+
 app.get('/knocker', function(req, res, next){
+    // todo xxx: check session after redirect from post
     if (appState.guestName === null &&
         ! req.session.isGuest) {
-        res.send("knocker template unimplented");
+        res.render('knocker', {});
     } else if (req.session.isGuest) {
         if (appState.chatting) {
             res.redirect('/room');
         } else {
-            res.send("knocker waiting template unimplemented");
+            res.render('knocker_wait', {});
         }
     } else {
         res.send("another guest is ahead of you");
@@ -84,7 +99,23 @@ app.get('/knocker', function(req, res, next){
 });
 
 app.post('/knocker', function(req, res, next) {
-    debugger;
+    var actionType = req.body.action_type;
+    if (appState.guestName !== null &&
+        ! actionType) {
+        res.send("you may not knock if another guest is ahead of you");
+    } else if (actionType) {
+        if (actionType === 'leave') {
+            appState.guestName = null;
+            req.session.isGuest = false;
+            res.redirect('/knocker');
+        } else {
+            res.send("unknown action type '" + actionType + "'");
+        }
+    } else {
+        appState.guestName = req.body.guest_name;
+        req.session.isGuest = true;
+        res.redirect('/knocker');
+    }
 });
 
 app.get('/', function(req, res, next){
