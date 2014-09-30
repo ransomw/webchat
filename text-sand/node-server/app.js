@@ -1,5 +1,6 @@
 var express = require('express');
 var session = require('express-session');
+exphbs  = require('express-handlebars');
 var app = express();
 
 app.use(session({
@@ -14,6 +15,15 @@ app.use(function(req, res, next) {
   console.log('SESSION', req.session)
   next();
 })
+
+app.engine('handlebars', exphbs({defaultLayout: 'main'}));
+app.set('view engine', 'handlebars');
+
+app.get('/login', function(req,res,next){
+    res.render('login', {
+        exampleText: "example text"
+    })
+});
 
 var appState = {
     guestName: null,
