@@ -1,7 +1,11 @@
 var express = require('express');
 var session = require('express-session');
-exphbs  = require('express-handlebars');
+var exphbs  = require('express-handlebars');
+var bodyParser = require('body-parser');
+
 var app = express();
+
+app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use(session({
     secret:'keyboard cat'
@@ -10,11 +14,10 @@ app.use(session({
 app.use(function(req, res, next) {
   if (!req.session || !req.session.isOwner) {
       req.session.isGuest = true;
-      req.session.isowner = false;
+      req.session.isOwner = false;
   }
-  console.log('SESSION', req.session)
   next();
-})
+});
 
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
@@ -23,10 +26,12 @@ app.get('/login', function(req,res,next){
     res.render('login', {
         exampleText: "example text",
         helpers: {
-            foo: function(){ return 'foo' }
-	}
-    })
+            foo: function(){ return 'foo'; }
+	      }
+    });
 });
+
+var secretKey = 'mmmsecret';
 
 var appState = {
     guestName: null,
@@ -36,14 +41,21 @@ var appState = {
 
 app.get('/keyhole', function(req, res, next){
     if (!req.session.isOwner) {
-        res.send("keyhole template unimplemented");
+        res.render('keyhole', {});
     } else {
         res.redirect('/peephole');
     }
 });
 
 app.post('/keyhole', function(req, res, next){
-    debugger;
+    var attemptedKey = req.body.secret_key;
+    if (attemptedKey === secretKey) {
+        req.session.isOwner = true;
+        req.session.isGuest = false;
+        res.redirect('/peephole');
+    } else {
+        res.send("got incorrect key '" + attemptedKey + "'");
+    }
 });
 
 app.get('/peephole', function(req, res, next){
@@ -57,9 +69,6 @@ app.get('/peephole', function(req, res, next){
 });
 
 app.get('/knocker', function(req, res, next){
-    console.log("***********");
-    console.log(req.session);
-    console.log("***********");
     if (appState.guestName === null &&
         ! req.session.isGuest) {
         res.send("knocker template unimplented");
@@ -79,7 +88,6 @@ app.post('/knocker', function(req, res, next) {
 });
 
 app.get('/', function(req, res, next){
-  console.log('SESSION', req.session)
   if (req.session.isOwner) {
       res.redirect('/peephole');
   } else {
