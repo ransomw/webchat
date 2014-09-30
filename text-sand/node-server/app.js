@@ -21,7 +21,10 @@ app.set('view engine', 'handlebars');
 
 app.get('/login', function(req,res,next){
     res.render('login', {
-        exampleText: "example text"
+        exampleText: "example text",
+        helpers: {
+            foo: function(){ return 'foo' }
+	}
     })
 });
 
