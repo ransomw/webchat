@@ -2,6 +2,19 @@ var express = require('express');
 var session = require('express-session');
 var app = express();
 
+app.use(session({
+    secret:'keyboard cat'
+}));
+
+app.use(function(req, res, next) {
+  if (!req.session || !req.session.isOwner) {
+      req.session.isGuest = true;
+      req.session.isowner = false;
+  }
+  console.log('SESSION', req.session)
+  next();
+})
+
 var appState = {
     guestName: null,
     chatting: false,
@@ -53,9 +66,7 @@ app.post('/knocker', function(req, res, next) {
 });
 
 app.get('/', function(req, res, next){
-  if (!req.session || !req.session.isOwner) {
-      req.session = { isGuest: true, isowner: false };
-  }
+  console.log('SESSION', req.session)
   if (req.session.isOwner) {
       res.redirect('/peephole');
   } else {
@@ -63,5 +74,4 @@ app.get('/', function(req, res, next){
   }
 });
 
-app.use(session({secret:'keyboard cat'}));
 module.exports = app;
