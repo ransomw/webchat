@@ -12,7 +12,7 @@ app.use(session({
 }));
 
 app.use(function(req, res, next) {
-  if (!req.session || !req.session.isOwner) {
+  if (!req.session) {
       req.session.isGuest = false;
       req.session.isOwner = false;
   }
@@ -61,7 +61,7 @@ app.get('/peephole', function(req, res, next){
   if (!req.session.isOwner) {
       res.redirect('/keyhole');
   } else if (appState.guestName !== null) {
-      res.render('peephole_wait', { guest_name: appState.guestName });
+      res.render('peephole_guest', { guest_name: appState.guestName });
   } else {
       res.render('peephole', {});
   }
