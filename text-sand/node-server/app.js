@@ -120,6 +120,43 @@ app.post('/knocker', function(req, res, next) {
     }
 });
 
+app.get('/room', function(req, res, next) {
+		if (!appState.chatting) {
+				if (req.session.isOwner) {
+						res.redirect('/peephole');
+				} else {
+						res.redirect('/knocker');
+				}
+		} else {
+				res.render('room', {});
+		}
+});
+
+app.post('/room', function(req, res, next) {
+    var actionType = req.body.action_type;
+		if (actionType === 'stop') {
+				appState.chatting = false;
+				appState.messages = []
+		}
+		res.redirect('/room'); // rely on redirect in get
+});
+
+// todo xxx
+app.get('/room/api', function(req, res, next){
+		res.send(appState.messages.toString());
+});
+
+app.post('/room/api', function(req, res, next){
+    var message = req.body.message;
+		if (req.session.isGuest) {
+				appState.messages.push([appState.guestName, message]);
+		} else if (req.session.isOwner) {
+				appState.messages.push(['X', message]);
+		} else {
+				throw new Error("post to api by session other than guest or owner");
+		}
+});
+
 app.get('/', function(req, res, next){
   if (req.session.isOwner) {
       res.redirect('/peephole');
