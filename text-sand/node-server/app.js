@@ -19,6 +19,8 @@ app.use(function(req, res, next) {
   next();
 });
 
+app.use('/assets', express.static('../assets/'));
+
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 
