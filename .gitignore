@@ -1,8 +1,2 @@
 *~
 *.pyc
-
-client/bower_components/
-client/js/config/server.js
-
-text-sand/assets/bower_components/
-text-sand/node-server/node_modules/
