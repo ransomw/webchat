@@ -1,0 +1,111 @@
+@main-header-margin: .5rem;
+@main-header-size: 2.1rem;
+
+html {
+  height: 100%
+}
+
+body {
+  height: 100%;
+  margin: 0;
+}
+
+#app {
+  height: calc(~"100%" - (1rem + @main-header-size + (2 * @main-header-margin)));
+}
+
+h1 {
+  text-align: center;
+  font-size: @main-header-size;
+  margin-top: @main-header-margin;
+  margin-bottom: @main-header-margin;
+  height: (@main-header-size + (2 * @main-header-margin));
+  background: aqua;
+  margin-left: 10%;
+  margin-right: 10%;
+  vertical-align: middle;
+  line-height: (@main-header-size + @main-header-margin);
+  border-radius: 1em;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#room {
+  display: flex;
+  height: 100%;
+}
+
+#room .users-list {
+  flex-basis: 0;
+  flex-grow: 1.5;
+  height: calc(~"100%" - 1em);
+  font-size: 1.4rem;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  background: maroon;
+  border-radius: 1em;
+}
+
+#room .users-list .loading {
+  display: flex;
+  justify-content: center;
+  margin: 1rem;
+}
+
+#room .users-list ul {
+  margin: 1rem;
+}
+
+#room .users-list li {
+  background-color: coral;
+  padding: .25em;
+  margin-top: .25em;
+  border-radius: .5em;
+  padding-top: .1em;
+  padding-bottom: .1em;
+  margin-top: .5em;
+}
+
+#room .chat-window {
+  flex-basis: 0;
+  flex-grow: 6;
+  height: 100%;
+  font-size: 1.25rem;
+}
+
+#room .chat-window .messages {
+  overflow-y: scroll;
+  height: calc(~"100%" - 2.5em);
+  margin-left: 1rem;
+  padding-right: 1rem;
+  background-color: aliceblue;
+}
+
+#room .chat-window .messages li .username {
+  font-weight: bold;
+}
+
+#room .chat-window .messages li .username:after {
+  content: ":";
+}
+
+#room .chat-window .input {
+  width: 100%;
+  font-size: 1.3rem;
+  margin-top: .5rem;
+}
+
+#room .chat-window .input form {
+  width: 100%;
+  display: flex;
+}
+
+#room .chat-window .input input {
+  flex-basis: 0;
+  flex-grow: .9;
+  font-size: inherit;
+}

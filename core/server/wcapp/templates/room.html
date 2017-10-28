@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block styles %}
+<link rel="stylesheet" type="text/css"
+      href="{{url_for('static', filename='client/styles/room.css')}}">
+{% endblock %}
+{% block content %}
+<h1>chat room</h1>
+<div id="app">
+  <span>loading...</span>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{url_for('static', filename='client/js/room.js')}}">
+</script>
+{% endblock %}

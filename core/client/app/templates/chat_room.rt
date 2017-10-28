@@ -1,0 +1,46 @@
+<rt-require dependency="./template_helpers"
+            as="th"/>
+<div id="room">
+  <div class="users-list">
+    <ul rt-if="this.props.users !== null">
+      <li rt-repeat="user in this.props.users"
+          key="{user.username}">
+        {user.username}
+      </li>
+    </ul>
+    <div class="loading"
+         rt-if="this.props.users === null">
+      <span class="loading-msg">
+        loading users list...</span>
+    </div>
+  </div>
+  <div class="chat-window">
+    <div class="messages">
+      <ul rt-if="this.props.messages !== null">
+        <li rt-repeat="message in th.idx_arr(this.props.messages)"
+            key="{message.idx}">
+          <span class="username">
+            {message.val.username}</span>
+          <span class="message">
+            {message.val.msg}</span>
+        </li>
+      </ul>
+      <div class="loading"
+           rt-if="this.props.messages === null">
+        <span class="loading-msg">
+          loading messages...</span>
+      </div>
+    </div>
+    <div class="input">
+      <form action="javascript:void(0);"
+            onSubmit={this.handle_submit_msg}
+            >
+        <input type="text"
+               value={this.state.str_msg}
+               onChange={this.handle_change_str_msg}
+               />
+      </form>
+    </div>
+  </div>
+</div>
+

@@ -1,2 +1,6 @@
 *~
 *.pyc
+
+node_modules/
+
+build/server_static/client/
