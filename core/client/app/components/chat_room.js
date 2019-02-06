@@ -1,27 +1,32 @@
-/*global require, module */
+const Component = require('react').Component
 
-var React = require('react');
+const rt_chat_room = require('../templates/chat_room.rt')
 
-var rt_chat_room = require('../templates/chat_room.rt');
+const actions = require('../actions/chat_room_actions')
+const bind_handlers = require('./util/bind_handlers')
 
-var actions = require('../actions/chat_room_actions');
+class ChatRoom extends Component {
+  constructor(props) {
+    super(props)
+    bind_handlers(this, /^handle_/)
+    this.state = {
+      str_msg: '',
+    }
+  }
 
-var ChatRoom = React.createClass({
-  getInitialState: function() {
-    return {str_msg: ''};
-  },
+  handle_change_str_msg(ev) {
+    this.setState({str_msg: ev.target.value})
+  }
 
-  handle_change_str_msg: function(ev) {
-    this.setState({str_msg: ev.target.value});
-  },
+  handle_submit_msg(ev) {
+    actions.send_message(this.state.str_msg)
+    this.setState({str_msg: ''})
+  }
 
-  handle_submit_msg: function (ev) {
-    actions.send_message(this.state.str_msg);
-    this.setState({str_msg: ''});
-  },
+  render() {
+    return rt_chat_room.call(this)
+  }
+}
 
-  render: rt_chat_room
-});
-
-var exports = ChatRoom;
-module.exports = exports;
+var exports = ChatRoom
+module.exports = exports

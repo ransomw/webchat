@@ -1,33 +1,29 @@
 /*global require */
 
-var io = require('socket.io-client');
-var _ = require('lodash');
+const React = require('react')
+const ReactDOM = require('react-dom')
 
-var React = require('react');
-var ReactDOM = require('react-dom');
+const ChatRoom = require('./components/chat_room')
+const ChatRoomStore = require('./stores/chat_room_store')
+const ChatRoomActions = require('./actions/chat_room_actions')
+const RoomEventEmitter = require('./room_event_emitter')
 
-var ChatRoom = require('./components/chat_room');
+const room_event_emitter = new RoomEventEmitter()
 
-var ChatRoomStore = require('./stores/chat_room_store');
-var chat_room_actions = require('./actions/chat_room_actions');
-var RoomEventEmitter = require('./room_event_emitter');
-
-var room_event_emitter = new RoomEventEmitter();
-
-var _render = function () {
-  var main_component = React.createElement(
+const _render = function () {
+  const main_component = React.createElement(
     ChatRoom,
     ChatRoomStore.getState()
-  );
-  ReactDOM.render(main_component, document.getElementById('app'));
-};
+  )
+  ReactDOM.render(main_component, document.getElementById('app'))
+}
 
-ChatRoomStore.listen(_render);
+ChatRoomStore.listen(_render)
 
-_render();
+_render()
 
-chat_room_actions.fetch_initial_state();
+ChatRoomActions.fetch_initial_state()
 room_event_emitter.on(
   'msg',
-  (msg) => chat_room_actions.add_msg(msg)
-);
+  (msg) => ChatRoomActions.add_msg(msg)
+)
