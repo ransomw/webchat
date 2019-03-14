@@ -28,6 +28,12 @@ const chat_room_actions = alt.createActions({
     }
   },
 
+  fetch_users: function () {
+    return function (dispatch) {
+      dispatch()
+    }
+  },
+
   fetch_messages_all: function () {
     return function (dispatch) {
       console.log("actions fetch_messages_all")

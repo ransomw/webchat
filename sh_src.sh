@@ -4,7 +4,7 @@ export PYTHONPATH=$PYTHONPATH:core/server:test
 
 which pyenv &> /dev/null
 if [ $? = 0 ]; then
-    pyenv activate webchat-old
+    pyenv activate webchat
 fi
 
 # nvm is a shell function, not an executable

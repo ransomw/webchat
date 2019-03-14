@@ -27,3 +27,7 @@ room_event_emitter.on(
   'msg',
   (msg) => ChatRoomActions.add_msg(msg)
 )
+room_event_emitter.on(
+  'users',
+  () => ChatRoomActions.fetch_users()
+)

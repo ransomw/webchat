@@ -14,6 +14,7 @@ const ChatRoomStore = alt.createStore({
     send_message: chat_room_actions.send_message,
     init_state: chat_room_actions.fetch_initial_state,
     add_msg: chat_room_actions.add_msg,
+    fetch_users: chat_room_actions.fetch_users,
   },
 
   state: {

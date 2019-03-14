@@ -4,13 +4,15 @@ such as databases and message queues
 """
 
 import re
+import pickle
 
-from wcapp.my_redis import get_redis
-from wcapp.my_redis import get_new_msg_chan
-from wcapp.my_redis import MSG_DATA_REGEXP
+from flask import current_app
+
+from .my_redis import get_redis
+from .my_redis import MSG_DATA_REGEXP
+from .my_redis import CHANNEL as REDIS_CHANNEL
 
 RE_USERNAME = r'^[A-z]+$'
-
 
 class ViewHelperError(Exception):
 
@@ -22,7 +24,7 @@ class ViewHelperError(Exception):
 
 def get_usernames():
     return [bytes_username.decode() for bytes_username in
-            get_redis().lrange('users', 0, -1)]
+            get_redis().hkeys('users')]
 
 
 def get_users():
@@ -50,7 +52,17 @@ def user_join(username):
         raise ViewHelperError("this username already registered")
     if username == 'system':
         raise ViewHelperError("'system' is a reserved username")
-    get_redis().rpush('users', username)
+    get_redis().hset('users', username, 'true')
+    get_redis().publish(REDIS_CHANNEL, pickle.dumps({
+        'username': username,
+        'action': 'join',
+    }))
+
+
+def ensure_user_joined(username):
+    current_users = get_usernames()
+    if username not in current_users:
+        user_join(username)
 
 
 def add_message(username, msg_str):
@@ -59,4 +71,7 @@ def add_message(username, msg_str):
         raise ViewHelperError(("got message from unregistered username"))
     message = username + ':' + msg_str
     get_redis().rpush('messages', message)
-    get_new_msg_chan().pub_new_message(message)
+    get_redis().publish(REDIS_CHANNEL, pickle.dumps({
+        'username': username,
+        'msg': msg_str,
+    }))

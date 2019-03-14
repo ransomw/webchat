@@ -11,7 +11,7 @@ then
     exit 64
 fi
 
-EXPECTED_VERSION_PYTHON="3.5.3"
+EXPECTED_VERSION_PYTHON="3.7.1"
 
 ### python #
 

@@ -1,5 +1,3 @@
-from pdb import set_trace as st
-
 import re
 
 from flask import render_template
@@ -9,20 +7,24 @@ from flask import url_for
 from flask import session as login_session
 from flask import jsonify
 
-from wcapp import app
-from wcapp import socketio
-
 import wcapp.view_helpers as vh
 from wcapp.view_helpers import ViewHelperError as VHError
 
-@app.route('/')
+from flask import Blueprint
+
+blueprint = Blueprint(
+    'views',
+    __name__,
+)
+
+@blueprint.route('/')
 def home():
     if 'username' not in login_session:
-        return redirect(url_for('join'))
-    return redirect(url_for('room'))
+        return redirect(url_for('views.join'))
+    return redirect(url_for('views.room'))
 
 
-@app.route('/join', methods=['GET', 'POST'])
+@blueprint.route('/join', methods=['GET', 'POST'])
 def join():
     if request.method == 'GET':
         return render_template('join.html')
@@ -32,17 +34,21 @@ def join():
         login_session['username'] = username
     except VHError as err:
         return repr(err)
-    return redirect(url_for('room'))
+    return redirect(url_for('views.room'))
 
 
-@app.route('/room')
+@blueprint.route('/room')
 def room():
     if 'username' not in login_session:
-        return redirect(url_for('join'))
+        return redirect(url_for('views.join'))
+    try:
+        vh.ensure_user_joined(login_session['username'])
+    except VHError as err:
+        return repr(err)
     return render_template('room.html')
 
 
-@app.route('/api/chat/users')
+@blueprint.route('/api/chat/users')
 def users():
     if 'username' not in login_session:
         resp = jsonify({
@@ -62,7 +68,7 @@ def users():
         return resp
 
 
-@app.route('/api/chat/messages', methods=['GET', 'POST'])
+@blueprint.route('/api/chat/messages', methods=['GET', 'POST'])
 def messages():
     if 'username' not in login_session:
         resp = jsonify({

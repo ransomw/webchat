@@ -1,71 +1,24 @@
 import re
+import json
+import asyncio
+import pickle
+from urllib.parse import urlparse
 
 import redis
+import aioredis
 
 from flask import _app_ctx_stack
 from flask import current_app
 
-from wcapp import app
-
 MSG_DATA_REGEXP = r'^([A-z]+):(.*)$'
 
-class _NewMsgChanRedis(object):
-    """ notification for new messages via redis """
+CHANNEL = 'chat-events'
 
-    THREAD_SLEEP_TIME = 0.005
-
-    def __init__(self, redis_session):
-        self._handlers = {}
-        self._pubsub_inst = redis_session.pubsub()
-        self._pubsub_inst.subscribe(**{
-            'new-messages': self._handle_new_messages})
-        self._redis_session = redis_session
-        self._thread_started = False
-
-    def _handle_new_messages(self, message):
-        msg = message['data'].decode('utf-8')
-        msg_match_obj = re.match(MSG_DATA_REGEXP, msg)
-        for handler in self._handlers.values():
-            handler({
-                'username': msg_match_obj.group(1),
-                'msg': msg_match_obj.group(2),
-                })
-        # return {
-        #     'username': msg_match_obj.group(1),
-        #     'msg': msg_match_obj.group(2),
-        #     }
-
-    def add_handler(self, handler, name=None):
-        if name is None:
-            name = handler.__name__
-        self._handlers[name] = handler
-
-    def remove_handler(self, handler, silent=False):
-        if isinstance(str(), handler):
-            name = handler.__name__
-        else:
-            name = handler
-        if silent:
-            self._handlers.pop(name, None)
-        else:
-            self._handlers.pop(name)
-
-    def pub_new_message(self, message):
-        self._redis_session.publish('new-messages', message)
-
-    def thread(self):
-        if self._thread_started:
-            return
-        self._thread_started = True
-        for msg_obj in self._pubsub_inst.listen():
-            print("'thread' got message", msg_obj)
-            pass
-        self._thread_started = False
-
+### threaded
 
 def _connect_redis():
     """ return a new redis session """
-    return redis.StrictRedis(host='localhost', port=6379, db=1)
+    return redis.StrictRedis(host='localhost', port=6379, db=11)
 
 
 def get_redis():
@@ -74,9 +27,73 @@ def get_redis():
         top.redis_session = _connect_redis()
     return top.redis_session
 
+### asyncio
 
-def get_new_msg_chan():
-    top = _app_ctx_stack.top
-    if not hasattr(top, 'new_msg_chan'):
-        top.new_msg_chan = _NewMsgChanRedis(get_redis())
-    return top.new_msg_chan
+def _parse_redis_url(url):
+    p = urlparse(url)
+    if p.scheme != 'redis':
+        raise ValueError('Invalid redis url')
+    if ':' in p.netloc:
+        host, port = p.netloc.split(':')
+        port = int(port)
+    else:
+        host = p.netloc or 'localhost'
+        port = 6379
+    if p.path:
+        db = int(p.path[1:])
+    else:
+        db = 0
+    if not host:
+        raise ValueError('Invalid redis hostname')
+    return host, port, db
+
+
+class AioRedisEmitter(object):
+
+    def __init__(self, session_manager,
+                     url='redis://localhost:6379/11'):
+        """
+        * session_manager (sockjs.SessionManager)
+        * url (str): the url of the redis database to connect
+           to for pubsub updates.
+        """
+        self._session_manager = session_manager
+        self._emitter_task = None
+        self.redis = None
+        self.host, self.port, self.db = _parse_redis_url(url)
+
+    def _emitToSession(self, session_id, data):
+        session = self._session_manager.get(session_id, None)
+        if session is None:
+            warn(("tried to emit to session, but didn't find "
+                      "session id in session manager"))
+            return
+        session.send(json.dumps(data))
+
+    async def _create_redis(self):
+        redis = await aioredis.create_redis(
+            (self.host, self.port),
+            db=self.db,
+        )
+        return redis
+
+    def start(self):
+        if not self._emitter_task:
+            self._emitter_task = asyncio.ensure_future(
+                self._listen(),
+                loop=self._session_manager.loop,
+                )
+
+    async def _listen(self):
+        """
+        create a separate connection for 'subscribe mode'
+        """
+        self.redis = await self._create_redis()
+        sub = await self._create_redis()
+        chan = (await sub.subscribe(CHANNEL))[0]
+        while True:
+            serialized_msg = await chan.get()
+            self._broadcast(pickle.loads(serialized_msg))
+
+    def _broadcast(self, data):
+        self._session_manager.broadcast(json.dumps(data))
