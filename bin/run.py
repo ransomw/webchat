@@ -53,4 +53,5 @@ if __name__ == '__main__':
     aioweb.run_app(aio_app,
                    host='localhost',
                    port=PORT,
+                   loop=loop,
     )

@@ -12,6 +12,7 @@ then
 fi
 
 EXPECTED_VERSION_PYTHON="3.7.1"
+ALLOW_PYTHON_VERSION_MISMATCH='true' #todo
 
 ### python #
 
@@ -21,7 +22,11 @@ if [ "$ACTUAL_VERSION" != "$EXPECTED_VERSION_PYTHON" ]
 then
     echo "expecting python $EXPECTED_VERSION_PYTHON, " \
          "found $ACTUAL_VERSION" 1>&2
-    exit 1
+    if $ALLOW_PYTHON_VERSION_MISMATCH; then
+        echo "..proceeding anyway.."
+    else
+        exit 1
+    fi
 fi
 echo "..ok"
 echo "updating python packages"

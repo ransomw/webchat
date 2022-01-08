@@ -2,10 +2,10 @@ cd "$(dirname $BASH_SOURCE)"
 
 export PYTHONPATH=$PYTHONPATH:core/server:test
 
-which pyenv &> /dev/null
-if [ $? = 0 ]; then
-    pyenv activate webchat
+if [ ! -d .venv ]; then
+    python -m venv .venv
 fi
+. .venv/bin/activate
 
 # nvm is a shell function, not an executable
 type nvm &> /dev/null
